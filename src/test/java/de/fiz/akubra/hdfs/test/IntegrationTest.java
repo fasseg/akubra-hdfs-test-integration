@@ -16,11 +16,7 @@
  */
 package de.fiz.akubra.hdfs.test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
+import static org.testng.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,31 +24,34 @@ import java.net.URI;
 import java.util.Iterator;
 import java.util.Random;
 
+import org.akubraproject.Blob;
+import org.akubraproject.BlobStoreConnection;
 import org.akubraproject.DuplicateBlobException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.junit.Before;
-import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
-import de.fiz.akubra.hdfs.HDFSBlob;
 import de.fiz.akubra.hdfs.HDFSBlobStore;
-import de.fiz.akubra.hdfs.HDFSBlobStoreConnection;
 
 public class IntegrationTest {
 	HDFSBlobStore store;
+	private static final Logger log = LoggerFactory.getLogger(IntegrationTest.class);
 	
-	@Before
+	@BeforeTest
 	public void init() throws Exception {
-		store = new HDFSBlobStore("hdfs://localhost:9000/akubra-hdfs-integration-test/");
+		store = new HDFSBlobStore(URI.create("hdfs://localhost:9000/akubra-hdfs-integration-test/"));
 	}
 
 	@Test
 	public void testHDFSBlobStore1() throws Exception {
-		HDFSBlob blob = createRandomBlob(4096, store);
+		Blob blob = createRandomBlob(4096, store);
 		assertNotNull(blob);
 		assertTrue(blob.getSize() == 4096);
-		System.out.println("created " + blob.getId());
-		HDFSBlob newBlob = (HDFSBlob) blob.moveTo(new URI("hdfs://localhost:9000/akubra-hdfs-integration-test/int_test.example"), null);
+		log.debug("created " + blob.getId());
+		Blob newBlob = blob.moveTo(new URI("file:int_test.example"), null);
 		assertTrue(newBlob.exists());
 		assertTrue(newBlob.getSize() == 4096);
 		assertFalse(blob.exists());
@@ -62,18 +61,18 @@ public class IntegrationTest {
 	@Test
 	public void testMoveBlob() throws Exception {
 		byte[] orig=createRandomData(8192);
-		HDFSBlob blob = (HDFSBlob) store.openConnection(null, null).getBlob(new ByteArrayInputStream(orig),8192,null);
+		Blob blob = store.openConnection(null, null).getBlob(new ByteArrayInputStream(orig),8192,null);
 		ByteArrayOutputStream out=new ByteArrayOutputStream();
 		IOUtils.copy(blob.openInputStream(), out);
 		byte[] target=out.toByteArray();
-		assertArrayEquals(orig,target);
+		assertEquals(orig,target);
 		blob.delete();
 	}
 
 	@Test
 	public void testOverwriteBlob() throws Exception {
 		byte[] orig=createRandomData(8192);
-		HDFSBlob blob = (HDFSBlob) store.openConnection(null, null).getBlob(new ByteArrayInputStream(orig),8192,null);
+		Blob blob = store.openConnection(null, null).getBlob(new ByteArrayInputStream(orig),8192,null);
 		orig=createRandomData(5687);
 		OutputStream blobOut=blob.openOutputStream(0, true);
 		IOUtils.copy(new ByteArrayInputStream(orig),blobOut);
@@ -81,32 +80,32 @@ public class IntegrationTest {
 		ByteArrayOutputStream out=new ByteArrayOutputStream();
 		IOUtils.copy(blob.openInputStream(), out);
 		byte[] target=out.toByteArray();
-		assertArrayEquals(orig,target);
+		assertEquals(orig,target);
 	}
 
-	@Test(expected=DuplicateBlobException.class)
+	@Test(expectedExceptions={DuplicateBlobException.class})
 	public void testDontOverwriteBlob() throws Exception {
 		byte[] orig=createRandomData(8192);
-		HDFSBlob blob = (HDFSBlob) store.openConnection(null, null).getBlob(new ByteArrayInputStream(orig),8192,null);
+		Blob blob = store.openConnection(null, null).getBlob(new ByteArrayInputStream(orig),8192,null);
 		orig=createRandomData(5687);
 		blob.openOutputStream(0, false);
 	}
 
 	@Test
 	public void testBlobIterator() throws Exception {
-		HDFSBlobStoreConnection conn=(HDFSBlobStoreConnection) store.openConnection(null, null);
+		BlobStoreConnection conn=store.openConnection(null, null);
 		Iterator<URI> it=conn.listBlobIds("/akubra-hdfs-integration-test");
 		while(it.hasNext()){
-			HDFSBlob blob=(HDFSBlob) conn.getBlob(it.next(), null);
+			Blob blob=conn.getBlob(it.next(), null);
 			assertTrue(blob.exists());
 			blob.delete();
 			assertFalse(blob.exists());
 		}
 	}
 
-	private HDFSBlob createRandomBlob(int size, HDFSBlobStore store) throws IOException {
+	private Blob createRandomBlob(int size, HDFSBlobStore store) throws IOException {
 		ByteArrayInputStream in = new ByteArrayInputStream(createRandomData(size));
-		return (HDFSBlob) store.openConnection(null, null).getBlob(in, size, null);
+		return store.openConnection(null, null).getBlob(in, size, null);
 	}
 	private byte[] createRandomData(int size){
 		byte[] buf = new byte[size];
