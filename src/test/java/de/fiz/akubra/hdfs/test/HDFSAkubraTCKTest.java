@@ -46,7 +46,7 @@ public class HDFSAkubraTCKTest extends TCKTestSuite {
 	protected String getPrefixFor(String name) {
 		return name;
 	}
-
+ 
 	@Override
 	public void testClosedConnection() throws Exception {
 		// dont run this test since the connection semantices are different
