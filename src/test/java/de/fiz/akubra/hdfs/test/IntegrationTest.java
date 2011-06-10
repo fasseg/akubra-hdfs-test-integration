@@ -29,8 +29,13 @@ import org.akubraproject.BlobStoreConnection;
 import org.akubraproject.DuplicateBlobException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -38,11 +43,12 @@ import de.fiz.akubra.hdfs.HDFSBlobStore;
 
 public class IntegrationTest {
 	HDFSBlobStore store;
+	private static final URI STORE_URI=URI.create("hdfs://localhost:9000/akubra-hdfs-integration-test/");
 	private static final Logger log = LoggerFactory.getLogger(IntegrationTest.class);
 	
 	@BeforeTest
 	public void init() throws Exception {
-		store = new HDFSBlobStore(URI.create("hdfs://localhost:9000/akubra-hdfs-integration-test/"));
+		store = new HDFSBlobStore(STORE_URI);
 	}
 
 	@Test
@@ -102,7 +108,11 @@ public class IntegrationTest {
 			assertFalse(blob.exists());
 		}
 	}
-
+	@AfterClass
+	public void cleanUp() throws Exception{
+		FileSystem fs=FileSystem.get(STORE_URI,new Configuration());
+		fs.delete(new Path(STORE_URI.toASCIIString()), true);
+	}
 	private Blob createRandomBlob(int size, HDFSBlobStore store) throws IOException {
 		ByteArrayInputStream in = new ByteArrayInputStream(createRandomData(size));
 		return store.openConnection(null, null).getBlob(in, size, null);
