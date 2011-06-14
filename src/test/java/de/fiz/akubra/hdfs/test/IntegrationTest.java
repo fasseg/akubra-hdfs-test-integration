@@ -57,7 +57,7 @@ public class IntegrationTest {
 		assertNotNull(blob);
 		assertTrue(blob.getSize() == 4096);
 		log.debug("created " + blob.getId());
-		Blob newBlob = blob.moveTo(new URI("file:int_test.example"), null);
+		Blob newBlob = blob.moveTo(new URI("hdfs:int_test.example"), null);
 		assertTrue(newBlob.exists());
 		assertTrue(newBlob.getSize() == 4096);
 		assertFalse(blob.exists());

@@ -39,7 +39,7 @@ public class HDFSAkubraTCKTest extends TCKTestSuite {
 
 	@Override
 	protected URI createId(String name) {
-		return URI.create("file:" + name);
+		return URI.create("hdfs:" + name);
 	}
 
 	@Override
