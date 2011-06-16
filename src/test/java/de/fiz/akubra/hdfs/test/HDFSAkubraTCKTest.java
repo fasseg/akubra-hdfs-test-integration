@@ -24,7 +24,7 @@ public class HDFSAkubraTCKTest extends TCKTestSuite {
 	}
 
 	public HDFSAkubraTCKTest() {
-		super(store, storeId, false, true);
+		super(store, storeId, false, true,true,true,true,true,false);
 	}
 
 	@Override
@@ -47,15 +47,4 @@ public class HDFSAkubraTCKTest extends TCKTestSuite {
 		return name;
 	}
  
-	@Override
-	public void testClosedConnection() throws Exception {
-		// dont run this test since the connection semantices are different
-		// super.testClosedConnection();
-	}
-
-	@Override
-	@Test(expectedExceptions = { UnsupportedOperationException.class })
-	public void testSync() throws Exception {
-		super.testSync();
-	}
 }
