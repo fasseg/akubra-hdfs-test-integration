@@ -3,9 +3,11 @@ package de.fiz.akubra.hdfs.test;
 import java.net.URI;
 
 import org.akubraproject.BlobStore;
+import org.akubraproject.BlobStoreConnection;
 import org.akubraproject.tck.TCKTestSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import de.fiz.akubra.hdfs.HDFSBlobStore;
@@ -38,12 +40,20 @@ public class HDFSAkubraTCKTest extends TCKTestSuite {
 
 	@Override
 	protected URI createId(String name) {
-		return URI.create("hdfs:" + name);
+		return URI.create(store.getId() + name);
 	}
 
 	@Override
 	protected String getPrefixFor(String name) {
 		return name;
+	}
+	@AfterClass
+	public void cleanup() throws Exception{
+		BlobStoreConnection conn=store.openConnection(null, null);
+		conn.getBlob(URI.create(storeId.toASCIIString() + "blobBasicList1"), null).delete();
+		conn.getBlob(URI.create(storeId.toASCIIString() + "blobMoveTo1"), null).delete();
+		conn.getBlob(URI.create(storeId.toASCIIString() + "blobMoveTo2"), null).delete();
+		conn.getBlob(URI.create(storeId.toASCIIString() + "blobMoveTo4"), null).delete();
 	}
 
 }

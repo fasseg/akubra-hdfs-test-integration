@@ -61,25 +61,27 @@ public class IntegrationTest {
 		Blob blob = createRandomBlob(4096, store);
 		assertNotNull(blob);
 		assertTrue(blob.getSize() == 4096);
-		log.debug("created " + blob.getId());
-		Blob newBlob = blob.moveTo(new URI("hdfs:int_test.example"), null);
+		Blob newBlob = blob.moveTo(URI.create(store.getId() + "int_test.example"), null);
 		assertTrue(newBlob.exists());
 		assertTrue(newBlob.getSize() == 4096);
-		assertFalse(blob.exists());
 		newBlob.delete();
 		assertFalse(newBlob.exists());
 	}
 
 	@Test
-	public void testMoveBlob() throws Exception {
-		byte[] orig = createRandomData(8192);
-		Blob blob = store.openConnection(null, null).getBlob(
-				new ByteArrayInputStream(orig), 8192, null);
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		IOUtils.copy(blob.openInputStream(), out);
-		byte[] target = out.toByteArray();
-		assertEquals(orig, target);
-		blob.delete();
+	public void testMoveBlob1() throws Exception {
+		Blob blob=createRandomBlob(2048, store);
+		assertNotNull(blob);
+		URI newId=URI.create(store.getId().toASCIIString() + "moved/testMove");
+		blob.moveTo(newId, null);
+	}
+
+	@Test
+	public void testMoveBlob2() throws Exception {
+		Blob blob=createRandomBlob(1024*128, store);
+		assertNotNull(blob);
+		URI newId=URI.create(store.getId().toASCIIString() + "moved/in/new/deep/directory/only/names/though/testMove");
+		blob.moveTo(newId, null);
 	}
 
 	@Test
