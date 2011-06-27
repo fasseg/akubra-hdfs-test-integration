@@ -3,16 +3,12 @@ package de.fiz.akubra.hdfs.test;
 import java.net.URI;
 
 import org.akubraproject.BlobStore;
-import org.akubraproject.BlobStoreConnection;
 import org.akubraproject.tck.TCKTestSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.Test;
 
 import de.fiz.akubra.hdfs.HDFSBlobStore;
 
-@Test
 public class HDFSAkubraTCKTest extends TCKTestSuite {
     private static BlobStore store;
     private static URI storeId;
