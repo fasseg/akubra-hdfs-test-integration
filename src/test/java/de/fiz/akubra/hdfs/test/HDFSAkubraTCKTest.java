@@ -1,8 +1,8 @@
 package de.fiz.akubra.hdfs.test;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
+
 
 import org.akubraproject.tck.TCKTestSuite;
 import org.apache.commons.io.FileUtils;
